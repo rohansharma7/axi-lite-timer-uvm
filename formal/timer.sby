@@ -1,0 +1,34 @@
+# timer.sby - SymbiYosys config. run from this directory: sby -f timer.sby
+#
+# needs a slang-capable yosys (`read_slang` command) for assert property /
+# disable iff / bind - yosys's classic non-slang frontend only parses
+# plain-procedural assertions inside always blocks, confirmed by a real
+# "syntax error, unexpected '@'" run against it. a real run against
+# read_slang (yosys 0.68+118) also found it doesn't yet support the |->
+# / |=> implication operators, so timer_formal.sv now writes every
+# property without them ($past()-based instead) - see that file's header.
+#
+# needs an SMT solver on PATH - z3 here.
+
+[tasks]
+bmc
+prove
+cover
+
+[options]
+bmc: mode bmc
+bmc: depth 30
+prove: mode prove
+prove: depth 15
+cover: mode cover
+cover: depth 30
+
+[engines]
+smtbmc z3
+
+[script]
+read_slang timer_axi.sv timer_formal.sv --top timer_axi
+
+[files]
+../rtl/timer_axi.sv
+timer_formal.sv
